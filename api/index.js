@@ -203,6 +203,15 @@ bot.hears('📊 Statistics', async (ctx) => {
     await handlers.statistics(ctx);
 });
 
+// Bot admin menu and shop handlers
+bot.hears('➕ Menu အသစ်ထည့်ရန်', async (ctx) => {
+    await handlers.addMenu(ctx);
+});
+
+bot.hears('📊 ဆိုင်စာရင်းကြည့်ရန်', async (ctx) => {
+    await handlers.viewMyShops(ctx);
+});
+
 // Navigation handlers
 bot.hears('🔙 နောက်သို့', async (ctx) => {
     await handlers.start(ctx);
@@ -226,69 +235,39 @@ bot.on('text', async (ctx) => {
         return;
     }
 
-    // Handle menu addition wizard
-    if (ctx.session && ctx.session.addingMenu) {
-        // This is part of the menu addition wizard
-        if (!ctx.session.menuStep) {
-            ctx.session.menuStep = 'name';
-            ctx.session.menuData = {};
-        }
-
-        switch (ctx.session.menuStep) {
-            case 'name':
-                ctx.session.menuData.name = ctx.message.text;
-                ctx.session.menuStep = 'price';
-                await ctx.reply('ဈေးနှုန်း (ကျပ်) ကို ရိုက်ထည့်ပါ:');
-                break;
-            
-            case 'price':
-                const price = parseInt(ctx.message.text);
-                if (isNaN(price) || price <= 0) {
-                    await ctx.reply('❌ မှန်ကန်သော ဈေးနှုန်းဖြစ်ရပါမည်။ ပြန်ရိုက်ထည့်ပါ:');
-                    return;
-                }
-                ctx.session.menuData.price = price;
-                ctx.session.menuStep = 'description';
-                await ctx.reply('ဖော်ပြချက် (ရွေးချယ်ချက်) ကို ရိုက်ထည့်ပါ (ခုံချင်း "မရှိ" ဟုရိုက်ပါ):');
-                break;
-            
-            case 'description':
-                ctx.session.menuData.description = ctx.message.text === 'မရှိ' ? null : ctx.message.text;
-                ctx.session.menuStep = 'category';
-                await ctx.reply('အမျိုးအစား (Main Course, Drink, Dessert, စသည်) ကို ရိုက်ထည့်ပါ:');
-                break;
-            
-            case 'category':
-                ctx.session.menuData.category = ctx.message.text;
-                ctx.session.menuStep = 'photo';
-                await ctx.reply('ဓာတ်ပုံတစ်ပုံပေးပို့ပါ (ရွေးချယ်ချက်) သို့မဟုတ် "ခုံချင်း" ဟုရိုက်ပါ:');
-                break;
-        }
+    // Handle menu creation wizard
+    if (ctx.session && ctx.session.menuStep) {
+        await handlers.handleMenuCreation(ctx);
+        return;
     }
+
+    // Handle general search
+    await handlers.handleSearch(ctx);
 });
 
 // Handle photo messages for menu addition
 bot.on('photo', async (ctx) => {
-    if (ctx.session && ctx.session.addingMenu && ctx.session.menuStep === 'photo') {
+    if (ctx.session && ctx.session.menuStep === 'photo') {
         ctx.session.menuData.photoId = ctx.message.photo[ctx.message.photo.length - 1].file_id;
         
-        // Get user's shop
-        const shops = await database.getShopsByOwner(ctx.from.id);
-        if (shops.length > 0) {
+        // Save menu item
+        try {
             await database.addMenuItem(
-                shops[0].id,
-                ctx.session.menuData.name,
+                ctx.session.menuData.shop_id,
+                ctx.session.menuData.item_name,
                 ctx.session.menuData.description,
                 ctx.session.menuData.price,
                 ctx.session.menuData.photoId,
                 ctx.session.menuData.category
             );
             
-            await ctx.reply(`✅ "${ctx.session.menuData.name}" ကို မီနူးထဲ ထည့်ပြီးပါပြီ!`);
+            await ctx.reply(`✅ "${ctx.session.menuData.item_name}" ကို မီနူးထဲ ထည့်ပြီးပါပြီ!`);
+        } catch (error) {
+            console.error('Error adding menu item:', error);
+            await ctx.reply('❌ Menu item ထည့်ရာတွင်အမှားဖြစ်ပါသည်။');
         }
         
         // Reset session
-        ctx.session.addingMenu = false;
         ctx.session.menuStep = null;
         ctx.session.menuData = null;
     }

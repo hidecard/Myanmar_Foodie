@@ -1,4 +1,5 @@
 const { Telegraf } = require('telegraf');
+const { session } = require('telegraf/session');
 require('dotenv').config();
 
 const database = require('./lib/database');
@@ -7,6 +8,12 @@ const keyboards = require('./lib/keyboards');
 
 // Initialize bot
 const bot = new Telegraf(process.env.BOT_TOKEN);
+
+// Session middleware
+bot.use(session({
+    property: 'session',
+    default: () => ({})
+}));
 
 // Middleware to check user role and set appropriate keyboard
 bot.use(async (ctx, next) => {

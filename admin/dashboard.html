@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Myanmar Foodie Bot - Admin Dashboard</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>
+                <i class="fas fa-utensils" style="margin-right: 8px;"></i>
+                Admin Panel
+            </h2>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="#" onclick="showSection('dashboard')" class="sidebar-item">
+                <i class="fas fa-tachometer-alt" style="margin-right: 8px;"></i> Dashboard
+            </a>
+            <a href="#" onclick="showSection('users')" class="sidebar-item">
+                <i class="fas fa-users" style="margin-right: 8px;"></i> Users
+            </a>
+            <a href="#" onclick="showSection('shops')" class="sidebar-item">
+                <i class="fas fa-store" style="margin-right: 8px;"></i> Shops
+            </a>
+            <a href="#" onclick="showSection('create-shop')" class="sidebar-item">
+                <i class="fas fa-plus-circle" style="margin-right: 8px;"></i> Create Shop
+            </a>
+            <a href="#" onclick="showSection('menu-management')" class="sidebar-item">
+                <i class="fas fa-utensils" style="margin-right: 8px;"></i> Menu Management
+            </a>
+            <a href="#" onclick="showSection('create-user')" class="sidebar-item">
+                <i class="fas fa-user-plus" style="margin-right: 8px;"></i> Create User
+            </a>
+            <a href="#" onclick="showSection('pending')" class="sidebar-item">
+                <i class="fas fa-clock" style="margin-right: 8px;"></i> Pending Shops
+            </a>
+            <a href="#" onclick="showSection('reviews')" class="sidebar-item">
+                <i class="fas fa-star" style="margin-right: 8px;"></i> Reviews
+            </a>
+            <a href="#" onclick="showSection('settings')" class="sidebar-item">
+                <i class="fas fa-cog" style="margin-right: 8px;"></i> Settings
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <button onclick="logout()" class="btn btn-danger" style="width: 100%;">
+                <i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="header-title">Admin Dashboard</h1>
+                <div class="header-user">
+                    <span id="userRole" class="role-badge bot-admin">Bot Admin</span>
+                    <span id="userName">hidecard1</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="section">
+            <div class="stats-grid">
+                <div class="card stat-card">
+                    <div>
+                        <p class="stat-info">Total Users</p>
+                        <p id="totalUsers" class="stat-value">0</p>
+                    </div>
+                    <i class="fas fa-users stat-icon blue"></i>
+                </div>
+                <div class="card stat-card">
+                    <div>
+                        <p class="stat-info">Total Shops</p>
+                        <p id="totalShops" class="stat-value">0</p>
+                    </div>
+                    <i class="fas fa-store stat-icon green"></i>
+                </div>
+                <div class="card stat-card">
+                    <div>
+                        <p class="stat-info">Pending Shops</p>
+                        <p id="pendingShops" class="stat-value">0</p>
+                    </div>
+                    <i class="fas fa-clock stat-icon yellow"></i>
+                </div>
+                <div class="card stat-card">
+                    <div>
+                        <p class="stat-info">Total Reviews</p>
+                        <p id="totalReviews" class="stat-value">0</p>
+                    </div>
+                    <i class="fas fa-star stat-icon purple"></i>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="card">
+                <h3 class="section-title" style="margin-bottom: 16px;">Recent Activity</h3>
+                <div id="recentActivity" style="display: flex; flex-direction: column; gap: 12px;">
+                    <!-- Activity items will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Users Section -->
+        <section id="users" class="section hidden">
+            <div class="card">
+                <div class="section-header">
+                    <div class="header-content">
+                        <h3 class="section-title">User Management</h3>
+                        <button onclick="refreshUsers()" class="btn btn-primary">
+                            <i class="fas fa-sync-alt" style="margin-right: 8px;"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+                <div class="section-content">
+                    <div class="form-group">
+                        <input type="text" id="userSearch" placeholder="Search users..." class="form-input">
+                    </div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Telegram ID</th>
+                                    <th>Username</th>
+                                    <th>Name</th>
+                                    <th>Role</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTable">
+                                <!-- Users will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Shops Section -->
+        <section id="shops" class="section hidden">
+            <div class="card">
+                <div class="section-header">
+                    <div class="header-content">
+                        <h3 class="section-title">Shop Management</h3>
+                        <button onclick="refreshShops()" class="btn btn-primary">
+                            <i class="fas fa-sync-alt" style="margin-right: 8px;"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+                <div class="section-content">
+                    <div class="form-group">
+                        <input type="text" id="shopSearch" placeholder="Search shops..." class="form-input">
+                    </div>
+                    <div class="shops-grid" id="shopsGrid">
+                        <!-- Shops will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Create Shop Section -->
+        <section id="create-shop" class="section hidden">
+            <div class="card">
+                <div class="section-header">
+                    <h3 class="section-title">Create New Shop</h3>
+                </div>
+                <div class="section-content">
+                    <form id="createShopForm" onsubmit="createShop(event)">
+                        <div class="space-y-4">
+                            <div class="form-group">
+                                <label class="form-label">Shop Name *</label>
+                                <input type="text" id="shopName" class="form-input" placeholder="Enter shop name" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Description</label>
+                                <textarea id="shopDescription" class="form-input" rows="3" placeholder="Enter shop description"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Township *</label>
+                                <select id="shopTownship" class="form-input" required>
+                                    <option value="">Select Township</option>
+                                    <option value="ဗဟန်းသီး">ဗဟန်းသီး</option>
+                                    <option value="လမ်းမတော်">လမ်းမတော်</option>
+                                    <option value="ဒဂုံ">ဒဂုံ</option>
+                                    <option value="ကျောက်မြောင်း">ကျောက်မြောင်း</option>
+                                    <option value="တောင်ဥက္ကလာပ">တောင်ဥက္ကလာပ</option>
+                                    <option value="မရမ်းကုန်း">မရမ်းကုန်း</option>
+                                    <option value="လသာ">လသာ</option>
+                                    <option value="ဗိုလ်တထောင်">ဗိုလ်တထောင်</option>
+                                    <option value="ကမာရွတ်">ကမာရွတ်</option>
+                                    <option value="အင်းစိန်">အင်းစိန်</option>
+                                    <option value="မင်္ဂလာဒုံ">မင်္ဂလာဒုံ</option>
+                                    <option value="သင်္ဃန်းကျွန်း">သင်္ဃန်းကျွန်း</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Vibe</label>
+                                <select id="shopVibe" class="form-input">
+                                    <option value="">Select Vibe</option>
+                                    <option value="Rooftop">Rooftop</option>
+                                    <option value="Quiet">Quiet</option>
+                                    <option value="Family-friendly">Family-friendly</option>
+                                    <option value="Nightlife">Nightlife</option>
+                                    <option value="Cozy Cafe">Cozy Cafe</option>
+                                    <option value="Party">Party</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Map URL</label>
+                                <input type="url" id="shopMapUrl" class="form-input" placeholder="Enter map URL (optional)">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Owner Telegram ID *</label>
+                                <input type="number" id="shopOwnerId" class="form-input" placeholder="Enter owner Telegram ID" required>
+                            </div>
+                            <div style="display: flex; gap: 12px;">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save" style="margin-right: 8px;"></i> Create Shop
+                                </button>
+                                <button type="button" onclick="resetShopForm()" class="btn btn-danger">
+                                    <i class="fas fa-times" style="margin-right: 8px;"></i> Reset
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Menu Management Section -->
+        <section id="menu-management" class="section hidden">
+            <div class="card">
+                <div class="section-header">
+                    <div class="header-content">
+                        <h3 class="section-title">Menu Management</h3>
+                        <div>
+                            <select id="menuShopSelect" class="form-input" style="width: 200px; margin-right: 12px;" onchange="loadShopMenu()">
+                                <option value="">Select Shop</option>
+                            </select>
+                            <button onclick="addMenuItem()" class="btn btn-success">
+                                <i class="fas fa-plus" style="margin-right: 8px;"></i> Add Item
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="section-content">
+                    <div id="menuItemsList" class="space-y-4">
+                        <!-- Menu items will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Create User Section -->
+        <section id="create-user" class="section hidden">
+            <div class="card">
+                <div class="section-header">
+                    <h3 class="section-title">Create New User</h3>
+                </div>
+                <div class="section-content">
+                    <form id="createUserForm" onsubmit="createUser(event)">
+                        <div class="space-y-4">
+                            <div class="form-group">
+                                <label class="form-label">Telegram ID *</label>
+                                <input type="number" id="newUserTelegramId" class="form-input" placeholder="Enter Telegram ID" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Username *</label>
+                                <input type="text" id="newUserUsername" class="form-input" placeholder="Enter username" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">First Name</label>
+                                <input type="text" id="newUserFirstName" class="form-input" placeholder="Enter first name">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Last Name</label>
+                                <input type="text" id="newUserLastName" class="form-input" placeholder="Enter last name">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Role</label>
+                                <select id="newUserRole" class="form-input">
+                                    <option value="0">User</option>
+                                    <option value="1">Shop Admin</option>
+                                    <option value="2">Bot Admin</option>
+                                </select>
+                            </div>
+                            <div style="display: flex; gap: 12px;">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save" style="margin-right: 8px;"></i> Create User
+                                </button>
+                                <button type="button" onclick="resetUserForm()" class="btn btn-danger">
+                                    <i class="fas fa-times" style="margin-right: 8px;"></i> Reset
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pending Shops Section -->
+        <section id="pending" class="section hidden">
+            <div class="card">
+                <div class="section-header">
+                    <h3 class="section-title">Pending Shop Approvals</h3>
+                </div>
+                <div class="section-content">
+                    <div id="pendingShopsList" class="space-y-4">
+                        <!-- Pending shops will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Reviews Section -->
+        <section id="reviews" class="section hidden">
+            <div class="card">
+                <div class="section-header">
+                    <h3 class="section-title">Recent Reviews</h3>
+                </div>
+                <div class="section-content">
+                    <div id="reviewsList" class="space-y-4">
+                        <!-- Reviews will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Settings Section -->
+        <section id="settings" class="section hidden">
+            <div class="card">
+                <div class="section-header">
+                    <h3 class="section-title">Settings</h3>
+                </div>
+                <div class="section-content">
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="form-label">Bot Configuration</h4>
+                            <div class="space-y-3">
+                                <div class="form-group">
+                                    <label class="form-label">Bot Token</label>
+                                    <input type="password" id="botToken" class="form-input" placeholder="Enter bot token">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Database URL</label>
+                                    <input type="text" id="dbUrl" class="form-input" placeholder="Enter database URL">
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="form-label">Township Management</h4>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="newTownship" class="form-input" placeholder="Add new township" style="flex: 1;">
+                                <button onclick="addTownship()" class="btn btn-success">
+                                    <i class="fas fa-plus" style="margin-right: 8px;"></i> Add
+                                </button>
+                            </div>
+                        </div>
+                        <button onclick="saveSettings()" class="btn btn-primary">
+                            <i class="fas fa-save" style="margin-right: 8px;"></i> Save Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span id="toastMessage"></span>
+    </div>
+
+    <script>
+        // Global variables
+        let currentUser = null;
+        let API_BASE = '/api/admin';
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            loadDashboard();
+        });
+
+        // Check authentication
+        function checkAuth() {
+            // For now, we'll simulate authentication with your telegram ID
+            // In production, this would check JWT tokens or session
+            currentUser = {
+                telegram_id: 7398914587,
+                username: 'hidecard1',
+                role: 2 // Bot Admin
+            };
+            
+            document.getElementById('userName').textContent = currentUser.username;
+            document.getElementById('userRole').textContent = currentUser.role === 2 ? 'Bot Admin' : 'Shop Admin';
+        }
+
+        // Show section
+        function showSection(sectionName) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => section.classList.add('hidden'));
+            
+            // Show selected section
+            const selectedSection = document.getElementById(sectionName);
+            if (selectedSection) {
+                selectedSection.classList.remove('hidden');
+            }
+            
+            // Update sidebar active state
+            const sidebarItems = document.querySelectorAll('.sidebar-item');
+            sidebarItems.forEach(item => item.classList.remove('active'));
+            
+            const activeItem = document.querySelector(`a[onclick="showSection('${sectionName}')"]`);
+            if (activeItem) {
+                activeItem.classList.add('active');
+            }
+            
+            // Load section-specific data
+            switch(sectionName) {
+                case 'dashboard':
+                    loadDashboard();
+                    break;
+                case 'users':
+                    loadUsers();
+                    break;
+                case 'shops':
+                    loadShops();
+                    break;
+                case 'pending':
+                    loadPendingShops();
+                    break;
+                case 'reviews':
+                    loadReviews();
+                    break;
+                case 'create-shop':
+                    loadShopsForSelect();
+                    break;
+                case 'menu-management':
+                    loadShopsForSelect();
+                    break;
+                case 'create-user':
+                    // No additional loading needed
+                    break;
+                case 'settings':
+                    // Load settings if needed
+                    break;
+            }
+        }
+
+        // Load dashboard data
+        async function loadDashboard() {
+            try {
+                // Load real statistics from API
+                const statsResponse = await fetch('/api/admin/stats', {
+                    headers: {
+                        'X-Telegram-ID': currentUser.telegram_id
+                    }
+                });
+                
+                if (statsResponse.ok) {
+                    const stats = await statsResponse.json();
+                    document.getElementById('totalUsers').textContent = stats.totalUsers.toLocaleString();
+                    document.getElementById('totalShops').textContent = stats.totalShops.toLocaleString();
+                    document.getElementById('pendingShops').textContent = stats.pendingShops.toLocaleString();
+                    document.getElementById('totalReviews').textContent = stats.totalReviews.toLocaleString();
+                } else {
+                    throw new Error('Failed to load statistics');
+                }
+                
+                // Load recent activity (for now, keep sample data)
+                const activity = [
+                    { type: 'user', message: 'New user registered: @username123', time: '2 mins ago' },
+                    { type: 'shop', message: 'New shop submitted: Tea House', time: '5 mins ago' },
+                    { type: 'review', message: 'New review: 5 stars for Coffee Shop', time: '10 mins ago' }
+                ];
+                
+                const activityHtml = activity.map(item => `
+                    <div class="activity-item">
+                        <div class="flex items-center">
+                            <i class="fas fa-${item.type === 'user' ? 'user' : item.type === 'shop' ? 'store' : 'star'}"></i>
+                            <span>${item.message}</span>
+                        </div>
+                        <span class="activity-time">${item.time}</span>
+                    </div>
+                `).join('');
+                
+                document.getElementById('recentActivity').innerHTML = activityHtml;
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                showToast('Error loading dashboard data');
+            }
+        }
+
+        // Load users
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/admin/users', {
+                    headers: {
+                        'X-Telegram-ID': currentUser.telegram_id
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load users');
+                }
+                
+                const users = await response.json();
+                
+                const usersHtml = users.map(user => `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-3">${user.telegram_id}</td>
+                        <td class="p-3">@${user.username || 'N/A'}</td>
+                        <td class="p-3">${(user.first_name || '') + ' ' + (user.last_name || '').trim() || 'N/A'}</td>
+                        <td class="p-3">
+                            <span class="px-2 py-1 rounded text-xs font-semibold ${
+                                user.role === 2 ? 'bg-purple-100 text-purple-800' :
+                                user.role === 1 ? 'bg-blue-100 text-blue-800' :
+                                'bg-gray-100 text-gray-800'
+                            }">
+                                ${user.role === 2 ? 'Bot Admin' : user.role === 1 ? 'Shop Admin' : 'User'}
+                            </span>
+                        </td>
+                        <td class="p-3">
+                            <button onclick="changeUserRole(${user.telegram_id})" class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-white text-sm transition">
+                                Change Role
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+                
+                document.getElementById('usersTable').innerHTML = usersHtml;
+            } catch (error) {
+                console.error('Error loading users:', error);
+                showToast('Error loading users');
+            }
+        }
+
+        // Load shops
+        async function loadShops() {
+            try {
+                const response = await fetch('/api/admin/shops', {
+                    headers: {
+                        'X-Telegram-ID': currentUser.telegram_id
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load shops');
+                }
+                
+                const shops = await response.json();
+                
+                const shopsHtml = shops.map(shop => `
+                    <div class="border rounded-lg p-4 hover:shadow-lg transition">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-semibold text-lg">${shop.name}</h4>
+                            <span class="px-2 py-1 rounded text-xs font-semibold ${
+                                shop.status === 'approved' ? 'bg-green-100 text-green-800' :
+                                shop.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-red-100 text-red-800'
+                            }">
+                                ${shop.status}
+                            </span>
+                        </div>
+                        <p class="text-gray-600 mb-2"><i class="fas fa-map-marker-alt mr-2"></i>${shop.township}</p>
+                        <p class="text-gray-600 mb-2"><i class="fas fa-music mr-2"></i>${shop.vibe || 'N/A'}</p>
+                        <p class="text-gray-600 mb-3"><i class="fas fa-user mr-2"></i>@${shop.owner_username || 'N/A'}</p>
+                        <div class="flex space-x-2">
+                            <button onclick="editShop(${shop.id})" class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-white text-sm transition">
+                                Edit
+                            </button>
+                            <button onclick="deleteShop(${shop.id})" class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-white text-sm transition">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+                
+                document.getElementById('shopsGrid').innerHTML = shopsHtml;
+            } catch (error) {
+                console.error('Error loading shops:', error);
+                showToast('Error loading shops');
+            }
+        }
+
+        // Load pending shops
+        async function loadPendingShops() {
+            try {
+                const response = await fetch('/api/admin/shops/pending', {
+                    headers: {
+                        'X-Telegram-ID': currentUser.telegram_id
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load pending shops');
+                }
+                
+                const pendingShops = await response.json();
+                
+                const pendingHtml = pendingShops.map(shop => `
+                    <div class="border rounded-lg p-4">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h4 class="font-semibold text-lg">${shop.name}</h4>
+                                <p class="text-gray-600">${shop.description || 'No description'}</p>
+                                <p class="text-gray-600"><i class="fas fa-map-marker-alt mr-2"></i>${shop.township}</p>
+                                <p class="text-gray-600"><i class="fas fa-music mr-2"></i>${shop.vibe || 'N/A'}</p>
+                                <p class="text-gray-600"><i class="fas fa-user mr-2"></i>@${shop.owner_username || 'N/A'}</p>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="approveShop(${shop.id})" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-white transition">
+                                <i class="fas fa-check mr-2"></i> Approve
+                            </button>
+                            <button onclick="rejectShop(${shop.id})" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-white transition">
+                                <i class="fas fa-times mr-2"></i> Reject
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+                
+                document.getElementById('pendingShopsList').innerHTML = pendingHtml || '<p class="text-gray-500">No pending shops</p>';
+            } catch (error) {
+                console.error('Error loading pending shops:', error);
+                showToast('Error loading pending shops');
+            }
+        }
+
+        // Load reviews
+        async function loadReviews() {
+            try {
+                const response = await fetch('/api/admin/reviews', {
+                    headers: {
+                        'X-Telegram-ID': currentUser.telegram_id
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load reviews');
+                }
+                
+                const reviews = await response.json();
+                
+                const reviewsHtml = reviews.map(review => `
+                    <div class="border rounded-lg p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h4 class="font-semibold">${review.shop_name}</h4>
+                                <p class="text-gray-600">by ${review.first_name || review.user_name || 'Anonymous'}</p>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-yellow-500">
+                                    ${'★'.repeat(review.rating)}${'☆'.repeat(5-review.rating)}
+                                </div>
+                                <p class="text-sm text-gray-500">${new Date(review.created_at).toLocaleDateString()}</p>
+                            </div>
+                        </div>
+                        <p class="text-gray-700">${review.comment || 'No comment'}</p>
+                    </div>
+                `).join('');
+                
+                document.getElementById('reviewsList').innerHTML = reviewsHtml || '<p class="text-gray-500">No reviews found</p>';
+            } catch (error) {
+                console.error('Error loading reviews:', error);
+                showToast('Error loading reviews');
+            }
+        }
+
+        // Action functions
+        async function changeUserRole(userId) {
+            const newRole = prompt('Enter new role (0=User, 1=Shop Admin, 2=Bot Admin):');
+            if (newRole && [0, 1, 2].includes(parseInt(newRole))) {
+                try {
+                    const response = await fetch(`/api/admin/users/${userId}/role`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Telegram-ID': currentUser.telegram_id
+                        },
+                        body: JSON.stringify({ role: parseInt(newRole) })
+                    });
+                    
+                    if (response.ok) {
+                        showToast(`User role updated to ${newRole}`);
+                        loadUsers();
+                    } else {
+                        throw new Error('Failed to update user role');
+                    }
+                } catch (error) {
+                    console.error('Error updating user role:', error);
+                    showToast('Error updating user role');
+                }
+            }
+        }
+
+        async function approveShop(shopId) {
+            try {
+                const response = await fetch(`/api/admin/shops/${shopId}/approve`, {
+                    method: 'PUT',
+                    headers: {
+                        'X-Telegram-ID': currentUser.telegram_id
+                    }
+                });
+                
+                if (response.ok) {
+                    showToast('Shop approved successfully!');
+                    loadPendingShops();
+                    loadShops();
+                } else {
+                    throw new Error('Failed to approve shop');
+                }
+            } catch (error) {
+                console.error('Error approving shop:', error);
+                showToast('Error approving shop');
+            }
+        }
+
+        async function rejectShop(shopId) {
+            if (confirm('Are you sure you want to reject this shop?')) {
+                try {
+                    const response = await fetch(`/api/admin/shops/${shopId}/reject`, {
+                        method: 'PUT',
+                        headers: {
+                            'X-Telegram-ID': currentUser.telegram_id
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        showToast('Shop rejected');
+                        loadPendingShops();
+                    } else {
+                        throw new Error('Failed to reject shop');
+                    }
+                } catch (error) {
+                    console.error('Error rejecting shop:', error);
+                    showToast('Error rejecting shop');
+                }
+            }
+        }
+
+        function editShop(shopId) {
+            showToast('Edit shop functionality coming soon');
+        }
+
+        async function deleteShop(shopId) {
+            if (confirm('Are you sure you want to delete this shop? This action cannot be undone.')) {
+                try {
+                    const response = await fetch(`/api/admin/shops/${shopId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-Telegram-ID': currentUser.telegram_id
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        showToast('Shop deleted successfully');
+                        loadShops();
+                    } else {
+                        throw new Error('Failed to delete shop');
+                    }
+                } catch (error) {
+                    console.error('Error deleting shop:', error);
+                    showToast('Error deleting shop');
+                }
+            }
+        }
+
+        function addTownship() {
+            const township = document.getElementById('newTownship').value;
+            if (township) {
+                showToast(`Township "${township}" added successfully`);
+                document.getElementById('newTownship').value = '';
+            }
+        }
+
+        function saveSettings() {
+            showToast('Settings saved successfully!');
+        }
+
+        function refreshUsers() {
+            loadUsers();
+            showToast('Users refreshed');
+        }
+
+        function refreshShops() {
+            loadShops();
+            showToast('Shops refreshed');
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/login';
+            }
+        }
+
+        // Shop Creation Functions
+        async function createShop(event) {
+            event.preventDefault();
+            
+            const shopData = {
+                name: document.getElementById('shopName').value,
+                description: document.getElementById('shopDescription').value,
+                township: document.getElementById('shopTownship').value,
+                vibe: document.getElementById('shopVibe').value,
+                mapUrl: document.getElementById('shopMapUrl').value,
+                ownerId: document.getElementById('shopOwnerId').value
+            };
+            
+            try {
+                const response = await fetch('/api/admin/shops', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Telegram-ID': currentUser.telegram_id
+                    },
+                    body: JSON.stringify(shopData)
+                });
+                
+                if (response.ok) {
+                    showToast('Shop created successfully!');
+                    resetShopForm();
+                    loadShops();
+                    showSection('shops');
+                } else {
+                    throw new Error('Failed to create shop');
+                }
+            } catch (error) {
+                console.error('Error creating shop:', error);
+                showToast('Error creating shop');
+            }
+        }
+
+        function resetShopForm() {
+            document.getElementById('createShopForm').reset();
+        }
+
+        // Load shops for select dropdowns
+        async function loadShopsForSelect() {
+            console.log('Loading shops for select...');
+            try {
+                const response = await fetch('/api/admin/shops', {
+                    headers: {
+                        'X-Telegram-ID': currentUser.telegram_id
+                    }
+                });
+                
+                if (response.ok) {
+                    const shops = await response.json();
+                    console.log('Shops loaded:', shops);
+                    const select = document.getElementById('menuShopSelect');
+                    if (select) {
+                        select.innerHTML = '<option value="">Select Shop</option>';
+                        
+                        shops.forEach(shop => {
+                            const option = document.createElement('option');
+                            option.value = shop.id;
+                            option.textContent = `${shop.name} (${shop.township})`;
+                            select.appendChild(option);
+                        });
+                    }
+                } else {
+                    console.error('Failed to load shops:', response.status);
+                }
+            } catch (error) {
+                console.error('Error loading shops for select:', error);
+            }
+        }
+
+        async function loadShopMenu() {
+            console.log('Loading shop menu...');
+            const shopId = document.getElementById('menuShopSelect').value;
+            console.log('Selected shop ID:', shopId);
+            if (!shopId) {
+                const container = document.getElementById('menuItemsList');
+                if (container) {
+                    container.innerHTML = '<p class="text-gray-500">Please select a shop</p>';
+                }
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/admin/shops/${shopId}/menu`, {
+                    headers: {
+                        'X-Telegram-ID': currentUser.telegram_id
+                    }
+                });
+                
+                console.log('Menu response status:', response.status);
+                
+                if (response.ok) {
+                    const menuItems = await response.json();
+                    console.log('Menu items loaded:', menuItems);
+                    displayMenuItems(menuItems);
+                } else {
+                    console.error('Failed to load menu items:', response.status);
+                    showToast('Error loading menu items');
+                }
+            } catch (error) {
+                console.error('Error loading menu items:', error);
+                showToast('Error loading menu items');
+            }
+        }
+
+        function displayMenuItems(menuItems) {
+            const container = document.getElementById('menuItemsList');
+            
+            if (menuItems.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">No menu items found</p>';
+                return;
+            }
+            
+            const menuHtml = menuItems.map(item => `
+                <div class="card" style="padding: 16px;">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h4 style="font-weight: 600; margin-bottom: 8px;">${item.item_name}</h4>
+                            <p style="color: #6b7280; margin-bottom: 4px;">${item.description || 'No description'}</p>
+                            <p style="color: #10b981; font-weight: 600;">${item.price} MMK</p>
+                            <p style="color: #6b7280; font-size: 14px;">Category: ${item.category || 'N/A'}</p>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="editMenuItem(${item.id})" class="btn btn-primary btn-sm">Edit</button>
+                            <button onclick="deleteMenuItem(${item.id})" class="btn btn-danger btn-sm">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            container.innerHTML = menuHtml;
+        }
+
+        function addMenuItem() {
+            const shopId = document.getElementById('menuShopSelect').value;
+            if (!shopId) {
+                showToast('Please select a shop first');
+                return;
+            }
+            
+            const itemName = prompt('Enter item name:');
+            const price = prompt('Enter price (in MMK):');
+            const description = prompt('Enter description (optional):');
+            const category = prompt('Enter category (optional):');
+            
+            if (itemName && price) {
+                createMenuItem(shopId, itemName, description, price, category);
+            }
+        }
+
+        async function createMenuItem(shopId, itemName, description, price, category) {
+            try {
+                const response = await fetch(`/api/admin/shops/${shopId}/menu`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Telegram-ID': currentUser.telegram_id
+                    },
+                    body: JSON.stringify({
+                        itemName,
+                        description,
+                        price: parseInt(price),
+                        category
+                    })
+                });
+                
+                if (response.ok) {
+                    showToast('Menu item added successfully!');
+                    loadShopMenu();
+                } else {
+                    throw new Error('Failed to add menu item');
+                }
+            } catch (error) {
+                console.error('Error adding menu item:', error);
+                showToast('Error adding menu item');
+            }
+        }
+
+        function editMenuItem(menuId) {
+            showToast('Edit menu item functionality coming soon');
+        }
+
+        async function deleteMenuItem(menuId) {
+            if (confirm('Are you sure you want to delete this menu item?')) {
+                try {
+                    const response = await fetch(`/api/admin/menu/${menuId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-Telegram-ID': currentUser.telegram_id
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        showToast('Menu item deleted successfully!');
+                        loadShopMenu();
+                    } else {
+                        throw new Error('Failed to delete menu item');
+                    }
+                } catch (error) {
+                    console.error('Error deleting menu item:', error);
+                    showToast('Error deleting menu item');
+                }
+            }
+        }
+
+        // User Creation Functions
+        async function createUser(event) {
+            event.preventDefault();
+            
+            const userData = {
+                telegramId: document.getElementById('newUserTelegramId').value,
+                username: document.getElementById('newUserUsername').value,
+                firstName: document.getElementById('newUserFirstName').value,
+                lastName: document.getElementById('newUserLastName').value,
+                role: document.getElementById('newUserRole').value
+            };
+            
+            try {
+                const response = await fetch('/api/admin/users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Telegram-ID': currentUser.telegram_id
+                    },
+                    body: JSON.stringify(userData)
+                });
+                
+                if (response.ok) {
+                    showToast('User created successfully!');
+                    resetUserForm();
+                    loadUsers();
+                    showSection('users');
+                } else {
+                    throw new Error('Failed to create user');
+                }
+            } catch (error) {
+                console.error('Error creating user:', error);
+                showToast('Error creating user');
+            }
+        }
+
+        function resetUserForm() {
+            document.getElementById('createUserForm').reset();
+        }
+
+        // Toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            toastMessage.textContent = message;
+            toast.classList.remove('hidden');
+            
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Search functionality
+        document.getElementById('userSearch')?.addEventListener('input', function(e) {
+            // Implement user search
+        });
+
+        document.getElementById('shopSearch')?.addEventListener('input', function(e) {
+            // Implement shop search
+        });
+    </script>
+</body>
+</html>

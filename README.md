@@ -32,6 +32,7 @@ A modern Telegram bot built with Node.js, Telegraf.js, Turso database, and deplo
 - **Bot Framework**: Telegraf.js (Excellent middleware support)
 - **Database**: Turso (LibSQL) - Edge database with low latency
 - **Hosting**: Vercel (Serverless functions)
+- **Admin Dashboard**: Express.js + TailwindCSS
 - **State Management**: Telegraf Sessions for multi-step workflows
 
 ## 📋 Database Schema
@@ -86,6 +87,15 @@ npm install -g vercel
 vercel
 ```
 
+### 7. Admin Dashboard (Optional)
+```bash
+# Start admin dashboard on http://localhost:3001
+npm run admin
+
+# Or use the launcher script (Windows)
+start-admin.bat
+```
+
 ## 📱 Bot Commands
 
 ### General Commands
@@ -122,6 +132,10 @@ vercel
 mm-shop/
 ├── api/
 │   └── index.js              # Main bot entry point (Vercel function)
+├── admin/
+│   ├── dashboard.html         # Admin dashboard UI
+│   ├── server.js             # Admin API server
+│   └── README.md             # Admin dashboard documentation
 ├── lib/
 │   ├── database.js           # Database operations
 │   ├── handlers.js           # Bot command handlers
@@ -130,7 +144,7 @@ mm-shop/
 │   └── schema.sql            # Database schema
 ├── scripts/
 │   └── migrate.js            # Database migration script
-├── api/index.js              # Vercel webhook handler
+├── start-admin.bat           # Admin dashboard launcher (Windows)
 ├── package.json              # Dependencies and scripts
 ├── vercel.json               # Vercel configuration
 └── README.md                 # This file

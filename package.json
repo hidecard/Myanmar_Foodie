@@ -7,19 +7,24 @@
     "dev": "vercel dev",
     "build": "echo 'No build step required'",
     "start": "node api/index.js",
+    "bot": "node run-bot.js",
+    "admin": "node admin/server.js",
+    "dev:admin": "nodemon admin/server.js",
     "db:migrate": "node scripts/migrate.js",
     "test:deploy": "node scripts/test-deploy.js",
     "make:admin": "node scripts/make-admin.js",
-    "reset:user": "node scripts/reset-user.js",
     "deploy": "vercel --prod",
     "deploy:preview": "vercel"
   },
   "dependencies": {
-    "telegraf": "^4.16.3",
     "@libsql/client": "^0.5.0",
-    "dotenv": "^16.3.1"
+    "cors": "^2.8.6",
+    "dotenv": "^16.3.1",
+    "express": "^4.22.1",
+    "telegraf": "^4.16.3"
   },
   "devDependencies": {
+    "nodemon": "^3.1.14",
     "vercel": "^32.4.1"
   },
   "keywords": [

@@ -7,7 +7,10 @@
     "dev": "vercel dev",
     "build": "echo 'No build step required'",
     "start": "node api/index.js",
-    "db:migrate": "node scripts/migrate.js"
+    "db:migrate": "node scripts/migrate.js",
+    "test:deploy": "node scripts/test-deploy.js",
+    "deploy": "vercel --prod",
+    "deploy:preview": "vercel"
   },
   "dependencies": {
     "telegraf": "^4.16.3",

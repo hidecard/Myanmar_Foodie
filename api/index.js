@@ -344,6 +344,16 @@ bot.catch((err, ctx) => {
 // Vercel webhook handler
 module.exports = async (req, res) => {
     try {
+        // Set CORS headers
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        
+        if (req.method === 'OPTIONS') {
+            res.status(200).end();
+            return;
+        }
+        
         // Verify webhook secret if needed
         if (req.method === 'POST') {
             await bot.handleUpdate(req.body);

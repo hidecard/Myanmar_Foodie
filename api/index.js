@@ -191,6 +191,18 @@ bot.hears('📩 Pending Shops', async (ctx) => {
     await handlers.viewPendingShops(ctx);
 });
 
+bot.hears('👥 User စာရင်း', async (ctx) => {
+    await handlers.viewUserList(ctx);
+});
+
+bot.hears('⚙️ Settings', async (ctx) => {
+    await handlers.settings(ctx);
+});
+
+bot.hears('📊 Statistics', async (ctx) => {
+    await handlers.statistics(ctx);
+});
+
 // Navigation handlers
 bot.hears('🔙 နောက်သို့', async (ctx) => {
     await handlers.start(ctx);

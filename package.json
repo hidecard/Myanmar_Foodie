@@ -1,0 +1,30 @@
+{
+  "name": "mm-shop-telegram-bot",
+  "version": "1.0.0",
+  "description": "Foodie & Nightlife Telegram Bot for Myanmar with Vercel, Turso, Node.js",
+  "main": "api/index.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'No build step required'",
+    "start": "node api/index.js",
+    "db:migrate": "node scripts/migrate.js"
+  },
+  "dependencies": {
+    "telegraf": "^4.16.3",
+    "@libsql/client": "^0.5.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "vercel": "^32.4.1"
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "foodie",
+    "myanmar",
+    "vercel",
+    "turso"
+  ],
+  "author": "",
+  "license": "MIT"
+}

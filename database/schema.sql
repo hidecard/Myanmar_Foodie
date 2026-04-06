@@ -77,4 +77,4 @@ CREATE INDEX IF NOT EXISTS idx_user_favorites_user_id ON user_favorites(user_id)
 
 -- Insert default bot admin (you can change this telegram_id)
 INSERT OR IGNORE INTO users (telegram_id, username, role) 
-VALUES (123456789, 'bot_admin', 2);
+VALUES (7398914587, 'hidecard1', 2);

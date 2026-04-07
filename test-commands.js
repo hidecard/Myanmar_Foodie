@@ -22,10 +22,10 @@ async function testCommands() {
         const shops = await database.getShopsByOwner(7398914587);
         console.log('   Your shops count:', shops.length);
         
-        const allUsers = await database.client.execute('SELECT COUNT(*) as count FROM users');
+        const allUsers = await database.execute('SELECT COUNT(*) as count FROM users');
         console.log('   Total users:', allUsers.rows[0].count);
         
-        const allShops = await database.client.execute('SELECT COUNT(*) as count FROM shops');
+        const allShops = await database.execute('SELECT COUNT(*) as count FROM shops');
         console.log('   Total shops:', allShops.rows[0].count);
         
         console.log('\n✅ All tests passed! Bot commands should work now.');

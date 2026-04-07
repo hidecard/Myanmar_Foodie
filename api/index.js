@@ -23,7 +23,7 @@ bot.use(session({
 
 // Middleware to check user role and set appropriate keyboard
 bot.use(async (ctx, next) => {
-    if (ctx.message) {
+    if (ctx.from) {
         const telegramId = ctx.from.id;
         const user = await database.getUser(telegramId);
         
@@ -56,7 +56,7 @@ bot.help(async (ctx) => {
     helpMessage += `⭐ **Saved** - သင့်ရဲ့ အကြိုက်ဆုံးဆိုင်များ\n`;
     helpMessage += `📊 **အကြိုက်ဆုံးများ** - သင့်ရဲ့ အကြိုက်ဆုံးများ\n\n`;
 
-    if (user.role === 1 || user.role === 2) {
+    if (user && (user.role === 1 || user.role === 2)) {
         helpMessage += `🏪 *Shop Admin Commands:*\n`;
         helpMessage += `➕ **Menu အသစ်ထည့်ရန်** - ဆိုင်မှာ မီနူးအသစ်ထည့်ပါ\n`;
         helpMessage += `🏪 **ဆိုင်အသစ်ထည့်ရန်** - ဆိုင်အသစ်ဖန်တီးပါ\n`;
@@ -64,7 +64,7 @@ bot.help(async (ctx) => {
         helpMessage += `📊 **ဆိုင်စာရင်းကြည့်ရန်** - သင့်ဆိုင်ရဲ့ စာရင်းကြည့်ပါ\n\n`;
     }
 
-    if (user.role === 2) {
+    if (user && user.role === 2) {
         helpMessage += `🤖 *Bot Admin Commands:*\n`;
         helpMessage += `/make_shop [user_id] - User ကို Shop Admin လုပ်ပါ\n`;
         helpMessage += `/make_admin [user_id] - User ကို Bot Admin လုပ်ပါ\n`;
@@ -99,11 +99,7 @@ bot.hears('🎲 Surprise Me', async (ctx) => {
     await handlers.surpriseMe(ctx);
 });
 
-bot.hears('⭐ Saved', async (ctx) => {
-    await handlers.viewFavorites(ctx);
-});
-
-bot.hears('📊 အကြိုက်ဆုံးများ', async (ctx) => {
+bot.hears(['⭐ Saved', '📊 အကြိုက်ဆုံးများ'], async (ctx) => {
     await handlers.viewFavorites(ctx);
 });
 
@@ -117,12 +113,12 @@ bot.hears('🎭 Vibe အလိုက်ရှာရန်', async (ctx) => {
 });
 
 // Township handlers
-bot.hears(['ဗဟန်းသီး', 'လမ်းမတော်', 'ဒဂုံ', 'ကျောက်မြောင်း', 'တောင်ဥက္ကလာပ', 'မရမ်းကုန်း', 'လသာ', 'ဗိုလ်တထောင်', 'ကမာရွတ်', 'အင်းစိန်', 'မင်္ဂလာဒုံ', 'သင်္ဃန်းကျွန်း', 'တာမွေ', 'ဒလမြို့နယ်', 'သန်လျင်', 'ကိုကိုး', 'ကျောက်တံတား', 'တိုက်ကြီး', 'လှည်းကူး', 'မှော်ဘီ', 'တညင်းကုန်း', 'ရွာသာအေး', 'ရန်ကုန်တိုင်းဒေသကြီး'], async (ctx) => {
+bot.hears(['ဗဟန်းသီး', 'လမ်းမတော်', 'ဒဂုံ', 'ကျောက်မြောင်း', 'တောင်ဥက္ကလာပ', 'မရမ်းကုန်း', 'လသာ', 'ဗိုလ်တထောင်', 'ကမာရွတ်', 'အင်းစိန်', 'မင်္ဂလာဒုံ', 'သင်္ဃန်းကျွန်း', 'တာမွေ', 'ဒလမြို့နယ်', 'သန်လျင်', 'ကိုကိုး', 'ကျောက်တံတား', 'တိုက်ကြီး', 'လှည်းကူး', 'မှော်ဘီ', 'တညင်းကုန်း', 'ရွာသာအေး', 'ရန်ကုန်တိုင်းဒေသကြီး', 'အခြားမြို့နယ်များ'], async (ctx) => {
     await handlers.handleTownshipSelection(ctx);
 });
 
-// Vibe handlers
-bot.hears(['Rooftop', 'Quiet', 'Family-friendly', 'Nightlife', 'Cozy Cafe', 'Party'], async (ctx) => {
+// Vibe handlers - Fixed to match keyboards.js labels
+bot.hears(['🏙️ Rooftop', '🤫 Quiet', '👨‍👩‍👧‍👦 Family-friendly', '🌃 Nightlife', '☕ Cozy Cafe', '🍻 Party'], async (ctx) => {
     await handlers.handleVibeSelection(ctx);
 });
 
@@ -134,7 +130,7 @@ bot.hears('🏪 ဆိုင်အသစ်ထည့်ရန်', async (ctx) =
 bot.hears('➕ Menu အသစ်ထည့်ရန်', async (ctx) => {
     const user = await database.getUser(ctx.from.id);
     
-    if (user.role !== 1) {
+    if (user.role !== 1 && user.role !== 2) {
         await ctx.reply('❌ ဒီအပ်ဒေါင်းကို Shop Admin များသာ အသုံးပြုနိုင်ပါသည်။');
         return;
     }
@@ -148,13 +144,15 @@ bot.hears('➕ Menu အသစ်ထည့်ရန်', async (ctx) => {
 
     // Start menu addition wizard
     ctx.session.addingMenu = true;
+    ctx.session.menuStep = 'name';
+    ctx.session.menuData = { shop_id: shops[0].id }; // Default to first shop
     await ctx.reply('📝 *မီနူးအသစ်ထည့်ရန်*\n\nဟင်းလျာအမည်ကို ရိုက်ထည့်ပါ:');
 });
 
 bot.hears('📊 ဆိုင်စာရင်းကြည့်ရန်', async (ctx) => {
     const user = await database.getUser(ctx.from.id);
     
-    if (user.role !== 1) {
+    if (user.role !== 1 && user.role !== 2) {
         await ctx.reply('❌ ဒီအပ်ဒေါင်းကို Shop Admin များသာ အသုံးပြုနိုင်ပါသည်။');
         return;
     }
@@ -203,21 +201,8 @@ bot.hears('📊 Statistics', async (ctx) => {
     await handlers.statistics(ctx);
 });
 
-// Bot admin menu and shop handlers
-bot.hears('➕ Menu အသစ်ထည့်ရန်', async (ctx) => {
-    await handlers.addMenu(ctx);
-});
-
-bot.hears('📊 ဆိုင်စာရင်းကြည့်ရန်', async (ctx) => {
-    await handlers.viewMyShops(ctx);
-});
-
 // Navigation handlers
-bot.hears('🔙 နောက်သို့', async (ctx) => {
-    await handlers.start(ctx);
-});
-
-bot.hears('🔙 ပင်မစာမျက်နှာသို့', async (ctx) => {
+bot.hears(['🔙 နောက်သို့', '🔙 ပင်မစာမျက်နှာသို့'], async (ctx) => {
     await handlers.start(ctx);
 });
 
@@ -236,7 +221,7 @@ bot.on('text', async (ctx) => {
     }
 
     // Handle menu creation wizard
-    if (ctx.session && ctx.session.menuStep) {
+    if (ctx.session && ctx.session.addingMenu) {
         await handlers.handleMenuCreation(ctx);
         return;
     }
@@ -268,6 +253,7 @@ bot.on('photo', async (ctx) => {
         }
         
         // Reset session
+        ctx.session.addingMenu = false;
         ctx.session.menuStep = null;
         ctx.session.menuData = null;
     }
@@ -307,7 +293,7 @@ bot.on('callback_query', async (ctx) => {
         const shopId = parseInt(action.split('_')[2]);
         const user = await database.getUser(ctx.from.id);
         
-        if (user.role === 2) {
+        if (user && user.role === 2) {
             await database.updateShopStatus(shopId, 'approved');
             await ctx.answerCbQuery('✅ ဆိုင်ကို ခွင့်ပြုပြီးပါပြီ!');
             await ctx.editMessageText('✅ ဆိုင်ကို ခွင့်ပြုပြီးပါပြီ!');
@@ -318,18 +304,41 @@ bot.on('callback_query', async (ctx) => {
         const shopId = parseInt(action.split('_')[2]);
         const user = await database.getUser(ctx.from.id);
         
-        if (user.role === 2) {
+        if (user && user.role === 2) {
             await database.updateShopStatus(shopId, 'rejected');
             await ctx.answerCbQuery('❌ ဆိုင်ကို ငြင်းပယ်ပြီးပါပြီ!');
             await ctx.editMessageText('❌ ဆိုင်ကို ငြင်းပယ်ပြီးပါပြီ!');
         }
+    }
+
+    // Added missing handlers
+    if (action.startsWith('shop_details_')) {
+        const shopId = parseInt(action.split('_')[2]);
+        const shop = await database.getShop(shopId);
+        if (shop) {
+            let message = `🏪 *${shop.name}*\n\n`;
+            message += `📍 ${shop.township}\n`;
+            message += `🎭 ${shop.vibe || 'N/A'}\n`;
+            message += `📝 ${shop.description || ''}\n`;
+            if (shop.map_url) message += `🗺️ [Google Maps](${shop.map_url})\n`;
+            
+            await ctx.replyWithMarkdown(message, keyboards.favoriteActions(shopId));
+        }
+        await ctx.answerCbQuery();
+    }
+
+    if (action.startsWith('delete_menu_')) {
+        const menuId = parseInt(action.split('_')[2]);
+        await database.deleteMenuItem(menuId);
+        await ctx.answerCbQuery('🗑️ Menu item ကို ဖျက်ပြီးပါပြီ!');
+        await ctx.editMessageText('🗑️ Menu item ကို ဖျက်ပြီးပါပြီ!');
     }
 });
 
 // Error handling
 bot.catch((err, ctx) => {
     console.error('Bot error:', err);
-    ctx.reply('❌ တစ်ခုခုမှားယွင်းနေပါသည်။ ကျေးဇူးပြုပြီး နောက်မှ ထပ်စမ်းကြည့်ပါ။');
+    if (ctx) ctx.reply('❌ တစ်ခုခုမှားယွင်းနေပါသည်။ ကျေးဇူးပြုပြီး နောက်မှ ထပ်စမ်းကြည့်ပါ။');
 });
 
 // Vercel webhook handler
@@ -358,6 +367,9 @@ module.exports = async (req, res) => {
 
 // For local development
 if (require.main === module) {
-    bot.launch();
-    console.log('🤖 Bot started locally...');
+    bot.launch().then(() => {
+        console.log('🤖 Bot started locally...');
+    }).catch(err => {
+        console.error('Failed to launch bot:', err);
+    });
 }
